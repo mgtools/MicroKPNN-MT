@@ -18,15 +18,15 @@ args = parser.parse_args()
 
 # Create sub directories in output directory
 if not os.path.exists(f"{args.output}/NetworkInput"):
-    cmd = f"mkdir {args.output}/NetworkInput"
+    cmd = f"mkdir -p {args.output}/NetworkInput"
     check_result=subprocess.check_output(cmd, shell=True)
 if not os.path.exists(f"{args.output}/Record"):
-    cmd = f"mkdir {args.output}/Record"
+    cmd = f"mkdir -p {args.output}/Record"
     check_result=subprocess.check_output(cmd, shell=True)
 if not os.path.exists(f"{args.output}/Checkpoint"):
-    cmd = f"mkdir {args.output}/Checkpoint"
+    cmd = f"mkdir -p {args.output}/Checkpoint"
     check_result=subprocess.check_output(cmd, shell=True)
-print("create/Check existance of NetworkInput dir, Record dir and Checkpoint dir in directory ", args.output )
+print("Create/Check existance of NetworkInput dir, Record dir and Checkpoint dir in directory ", args.output )
 
 # create specied taxonomy info
 cmd = f"python lib/taxonomy_info.py --inp {args.data_path} --out {args.output}/NetworkInput/"

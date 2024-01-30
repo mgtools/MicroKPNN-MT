@@ -1,6 +1,7 @@
 import os
 import argparse
 from tqdm import tqdm
+import pickle
 
 import torch
 import torch.nn as nn
@@ -13,21 +14,33 @@ from sklearn.metrics import mean_absolute_error, r2_score, accuracy_score, roc_a
 
 from dataset import MicroDataset
 from model import MicroKPNN_MTL
+from explanation_utils import explain_batch
 
 
 
-def get_lr(optimizer):
-	for param_group in optimizer.param_groups:
-		return param_group['lr']
-
-def pred(model, loader, device): 
+def pred(model, loader, device, if_explain=False): 
 	model.eval()
 
 	diseases = []
 	pred_ages, pred_genders, pred_bmis, pred_bodysites, pred_diseases = [], [], [], [], []
 	sample_ids = []
 
-	with tqdm(total=len(loader)) as bar:
+	# Initialize dictionaries to hold aggregated explanation results
+	if if_explain: 
+		explanation_results = {
+			'age_disease_explanations': {}, 
+			'gender_disease_explanations': {}, 
+			'bmi_disease_explanations': {}, 
+			'bodysite_disease_explanations': {}, 
+
+			'hidden_age_explanations': {}, 
+			'hidden_gender_explanations': {}, 
+			'hidden_bmi_explanations': {}, 
+			'hidden_bodysite_explanations': {}, 
+		}
+
+	desc = 'Eval & Explain' if if_explain else 'Eval'
+	with tqdm(total=len(loader), desc=desc) as bar:
 		for _, batch in enumerate(loader): 
 			sample_id, spec, age, gender, bmi, bodysite, disease = batch
 			spec = spec.type(torch.cuda.FloatTensor).to(device)
@@ -41,7 +54,7 @@ def pred(model, loader, device):
 			with torch.no_grad():
 				pred_age, pred_gender, pred_bmi, pred_bodysite, pred_disease = model(spec, age, gender, bmi, bodysite)
 
-			bar.set_description('Eval')
+			# bar.set_description('Eval')
 			bar.update(1)
 
 			age_dim = age.size(1)
@@ -60,13 +73,28 @@ def pred(model, loader, device):
 			pred_diseases.append(pred_disease.view(-1, disease_dim).detach().cpu())
 			sample_ids = sample_ids + list(sample_id)
 
+			if if_explain: 
+				# Process each batch and get the explanation results
+				batch_results = explain_batch(model, batch, device)
+
+				# Aggregate the explanation results
+				for key in explanation_results:
+					for sub_key, result in batch_results[key].items():
+						if sub_key in explanation_results[key]:
+							explanation_results[key][sub_key] = torch.cat((explanation_results[key][sub_key], result), dim=0)
+						else:
+							explanation_results[key][sub_key] = result
+
 	pred_ages = torch.cat(pred_ages, dim=0)
 	pred_genders = torch.cat(pred_genders, dim=0)
 	pred_bmis = torch.cat(pred_bmis, dim=0)
 	pred_bodysites = torch.cat(pred_bodysites, dim=0)
 	diseases = torch.cat(diseases, dim = 0)
 	pred_diseases = torch.cat(pred_diseases, dim=0)
-	return sample_ids, pred_ages, pred_genders, pred_bmis, pred_bodysites, diseases, pred_diseases
+	if if_explain:
+		return sample_ids, pred_ages, pred_genders, pred_bmis, pred_bodysites, diseases, pred_diseases, explanation_results
+	else: 
+		return sample_ids, pred_ages, pred_genders, pred_bmis, pred_bodysites, diseases, pred_diseases
 
 def post_process_age(score, age_dict):
 	re_dict = {v: k for k, v in age_dict.items()}
@@ -109,9 +137,9 @@ if __name__ == "__main__":
 	parser.add_argument('--edge_list', type=str, required = True, help='Path to edge list')
 	parser.add_argument('--output', type=str, required = True, help='Path to output')
 
-	parser.add_argument('--checkpoint_path', type=str, default = '', help='Path to save checkpoint')
 	parser.add_argument('--resume_path', type=str, default='', help='Path to pretrained model')
 	parser.add_argument('--records_path', type=str, default='', help='Path to save records')
+	parser.add_argument('--explanation_path', type=str, default='', help='(option) Path to save explanation results')
 	parser.add_argument('--device', type=int, default=0, help='Which gpu to use if any (default: 0)')
 	parser.add_argument('--seed', type=int, default=42, help='Seeds for random, torch, and numpy')
 	args = parser.parse_args()
@@ -175,7 +203,10 @@ if __name__ == "__main__":
 	# 3. Pred
 	print('Loading the best model...')
 	model.load_state_dict(torch.load(args.resume_path, map_location=device)['model_state_dict'])
-	sample_ids, age_pred, gender_pred, bmi_pred, bodysite_pred, disease_true, disease_pred = pred(model, all_loader, device)
+	if args.explanation_path != '':
+		sample_ids, age_pred, gender_pred, bmi_pred, bodysite_pred, disease_true, disease_pred, explain_results = pred(model, all_loader, device, if_explain=True)
+	else: 
+		sample_ids, age_pred, gender_pred, bmi_pred, bodysite_pred, disease_true, disease_pred = pred(model, all_loader, device, if_explain=False)
 	
 	_, disease_pred_tag = torch.max(disease_pred, dim=1)
 	_, disease_true_tag = torch.max(disease_true, dim=1)
@@ -201,7 +232,7 @@ if __name__ == "__main__":
 
 	# final results
 	records = pd.DataFrame.from_dict(records)
-	print(records)
+	# print(records) 
 	records.to_csv(args.records_path + '/pred_eval.csv')
 	print('save the records into {}'.format(args.records_path + '/pred_eval.csv'))
 	print('Done!')
@@ -217,6 +248,13 @@ if __name__ == "__main__":
 	data_df = pd.read_csv(args.metadata_path)
 	res_df = pd.DataFrame({'ID': sample_ids, 'Pred age': age_pred, 'Pred sex': gender_pred, 'Pred BMI': bmi_pred, 'Pred bodysite': bodysite_pred, 'Pred disease':disease_pred})
 	res_df = res_df.merge(data_df, how='left', left_on='ID', right_on='run_id')
-	print(res_df)
+	print(res_df.head())
 	res_df.to_csv(args.records_path+'/pred_results.csv')
 	print('Save the predicted metadata!')
+
+	# export the explanation results
+	if args.explanation_path != '': 
+		with open(args.explanation_path, 'wb') as file:
+			pickle.dump(explain_results, file)
+		print('Saved the explanation results!')
+

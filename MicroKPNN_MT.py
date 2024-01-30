@@ -13,7 +13,7 @@ parser.add_argument('--metadata_path', type=str, required=True, help='Path to me
 parser.add_argument('--device', type=int, default=0, help='Which gpu to use if any (default: 0)')
 parser.add_argument('--output', type=str, help='path to output folder')
 parser.add_argument('--taxonomy', type=str , default=5, help='taxonomy to use for hidden layer')
-
+parser.add_argument('--k_fold', type=int, default=5, help='k for k-fold validation')
 args = parser.parse_args()
 
 # Create sub directories in output directory
@@ -40,6 +40,11 @@ print("EdgeList has been created")
 
 # train model
 edges= args.output+"/NetworkInput/EdgeList.csv"
-cmd = f"python lib/train_meta_kfold.py --k_fold 5 --data_path {args.data_path} --metadata_path {args.metadata_path} --edge_list {edges} --output {args.output} --checkpoint_path {args.output}/Checkpoint/microkpnn_mt.pt --records_path {args.output}/Record/microkpnn_mt.csv --device {args.device}"
+if args.k_fold != 0: 
+    # k-fold validation
+    cmd = f"python lib/train_meta_kfold.py --k_fold {args.k_fold} --data_path {args.data_path} --metadata_path {args.metadata_path} --edge_list {edges} --output {args.output} --checkpoint_path {args.output}/Checkpoint/microkpnn_mt.pt --records_path {args.output}/Record/microkpnn_mt.csv --device {args.device}"
+else:
+    # randomly spliting the training and test sets
+    cmd = f"python lib/train_meta.py --data_path {args.data_path} --metadata_path {args.metadata_path} --edge_list {edges} --output {args.output} --checkpoint_path {args.output}/Checkpoint/microkpnn_mt.pt --records_path {args.output}/Record/microkpnn_mt.csv --device {args.device}"
 check_result=subprocess.check_output(cmd, shell=True)
 print("Well Done")

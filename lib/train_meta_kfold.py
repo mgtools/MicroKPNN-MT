@@ -480,7 +480,7 @@ if __name__ == "__main__":
 		records['Disease AUC'].append(disease_auc)
 		records['Disease F1'].append(disease_f1)
 		records['Fold Index'].append(fold_i)
-	print(records)
+	# print(records)
 	# final results
 	records = pd.DataFrame.from_dict(records)
 	print(records)

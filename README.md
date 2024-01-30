@@ -26,24 +26,29 @@ pip install scikit-learn
 
 2. Run the following command:  
 
-you can select your taxonomy based on the following:
+You can select your taxonomy based on the following:
 
 ```python
 {0:'superkingdom', 1:'phylum',2:'class', 3:'order', 4:'family', 5:'genus'}
 ```
 
-to run the pipeline on the dataset use following command
+To run the pipeline on the dataset use following command
 
 ```bash
+# 5-fold validation
 python MicroKPNN_MT.py \
 --data_path Dataset/relative_abundance.csv \
 --metadata_path Dataset/metadata.csv \
 --output output/ \
 --taxonomy 5 \
+--k_fold 5 \
 --device 0
+
+# note: To train only one model using randomly splitting training and test set, 
+# please set k_fold as 0. 
 ```
 
-now if you wanna run one of your trained model on your dataset and get results you can do following:
+Now if you wanna run one of your trained model on your dataset and get results you can do following:
 
 ```bash
 python lib/pred_meta.py \
@@ -55,6 +60,6 @@ python lib/pred_meta.py \
 --records_path output/Record/ \
 --explanation_path output/microkpnn_mt_fold0_explanation.pkl \
 --device 0 
-```
 
-note: `--explanation_path` is an optional parameter for explanation. 
+# note: `--explanation_path` is an optional parameter for explanation. 
+```

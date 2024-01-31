@@ -2,6 +2,9 @@
 
 Multi-task microbiome-based knowledge-primed neural network
 
+## Dataset
+We employed the mBodyMap database, featuring 34,233 preprocessed samples from 56 projects and 25 diseases. The dataset underwent categorization of BMI and age data, yielding insightful patterns for analysis 
+
 ## Usage
 
 **Step 1**: Clone the repo and unzip the datasets using the following commands: 

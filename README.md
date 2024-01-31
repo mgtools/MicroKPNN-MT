@@ -39,6 +39,7 @@ You can select your taxonomy based on the following:
 ```python
 {0:'superkingdom', 1:'phylum',2:'class', 3:'order', 4:'family', 5:'genus'}
 ```
+Based on our experiments, we observed that, in general, the genus taxonomic rank yielded the best results. Therefore, we recommend using genus (--taxonomy 5); however, users are welcome to explore other taxonomic ranks for their analysis.
 
 To run the pipeline on the dataset use following command: 
 

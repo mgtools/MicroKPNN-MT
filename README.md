@@ -3,7 +3,8 @@
 Multi-task microbiome-based knowledge-primed neural network
 
 ## Dataset
-We employed the mBodyMap database, featuring 34,233 preprocessed samples from 56 projects and 25 diseases. The dataset underwent categorization of BMI and age data, yielding insightful patterns for analysis 
+
+We employed the mBodyMap database, featuring 34,233 preprocessed samples from 56 projects and 25 diseases. The dataset underwent categorization of BMI and age data, yielding insightful patterns for analysis. 
 
 ## Usage
 
@@ -118,14 +119,17 @@ The format of the explanation results (`output/microkpnn_mt_fold0_explanation.pk
 
 **Experiment 1**: K-fold validation of disease prediction and missing meta-data prediction
 
-**Experiment 2**: Incorporating metadata helps improve the model generalizability
+```bash
+# train and evluation (5-fold)
+bash exp_5fold.sh
+```
 
-**Experiment 3**: Interpretation of the predictive models
+**Experiment 2**: Interpretation of the predictive models
 
 ```bash
 # train, evaluate, and explain 20 models
 bash exp_interpretation.sh
-
-# plot the explanation results
-# (comming soon...)
 ```
+
+The codes for plotting explanation results are in `exp_interpretation_plots.ipynb`. 
+

@@ -46,13 +46,13 @@ do
 --edge_list output/NetworkInput/genus/EdgeList.csv \
 --output output/ \
 --resume_path output/Checkpoint/microkpnn_$i.pt \
---explain_sample_path output/Explain/explanation_sample_$i.pkl \
+--explanation_path output/Explain/explanation_sample_$i.pkl \
 --device 0"
     python lib/explain_meta.py --data_path Dataset/relative_abundance.csv \
     --metadata_path Dataset/metadata.csv \
     --edge_list output/NetworkInput/genus/EdgeList.csv \
     --output output/ \
     --resume_path output/Checkpoint/microkpnn_$i.pt \
-    --explain_sample_path output/Explain/explanation_sample_$i.pkl \
+    --explanation_path output/Explain/explanation_sample_$i.pkl \
     --device 0
 done

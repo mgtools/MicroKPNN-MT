@@ -41,7 +41,9 @@ class MicroKPNN_MTL(nn.Module):
 		parent_nodes = [node for node in parent_nodes if node not in metadatas] # remove metadata from parent nodes
 
 		child_nodes = species 
+		parent_nodes.sort()
 		parent_dict = {k: i for i, k in enumerate(parent_nodes)}
+		child_nodes.sort()
 		child_dict = {k: i for i, k in enumerate(child_nodes)}
 		self.species_dict = child_dict # used outside the class
 				

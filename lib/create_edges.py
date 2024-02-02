@@ -39,13 +39,10 @@ def create_edges_from_taxonomy(species_ids, taxonomy_infos, taxonomy_num):
     taxa = {0:'superkingdom', 1:'phylum',2:'class', 3:'order', 4:'family', 5:'genus'}
     taxonomy_field = taxa[int(taxonomy_num)]
     for species_id in species_ids:
-        edges.append((taxonomy_infos[species_id][taxonomy_field], species_id))
-        taxonomy_nodes.append(taxonomy_infos[species_id][taxonomy_field])
-        if taxonomy_infos[species_id][taxonomy_field] == '':
-            # print(taxonomy_infos[species_id])
-            print(species_id)
-            count+=1
-    print(count)
+        if taxonomy_infos[species_id][taxonomy_field] != '':
+            edges.append((taxonomy_infos[species_id][taxonomy_field], species_id))
+            taxonomy_nodes.append(taxonomy_infos[species_id][taxonomy_field])
+        
     print(list(set(taxonomy_nodes)))
     print(f"Number of {taxonomy_field}s: {len(set(taxonomy_nodes))}")
     return edges, taxonomy_nodes

@@ -22,8 +22,8 @@ tar -xvzf ./Default_Database/names.tar.gz -C ./Default_Database/
 **Step 2**: Install anaconda from [here](https://docs.anaconda.com/free/anaconda/install/index.html) and establish the anaconda environment using the following commands: 
 
 ```bash
-conda create -n microkpnn python=3.8
-conda activate microkpnn
+conda create -n microkpnn-mt python=3.8
+conda activate microkpnn-mt
 
 # install the suitable PyTorch version according to your CUDA version
 # e.g.
@@ -134,4 +134,26 @@ bash exp_interpretation.sh
 ```
 
 The codes for plotting explanation results are in `exp_interpretation_plots.ipynb`. 
+
+## Sample User Dataset
+
+Here we provide a smaller dataset containing 4 different phenotypes.
+
+```bash
+tar -xvzf ./Dataset/sample_relative_abundance.tar.gz -C ./Dataset/
+```
+
+```bash
+# 5-fold validation
+python MicroKPNN_MT.py \
+--data_path Dataset/sample_relative_abundance.csv \
+--metadata_path Dataset/sample_metadata.csv \
+--output sample_output/ \
+--taxonomy 5 \
+--k_fold 5 \
+--device 0
+
+# note: To train only one model using randomly splitting training and test set, 
+# please set k_fold as 0. 
+```
 

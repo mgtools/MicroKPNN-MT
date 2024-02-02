@@ -32,6 +32,7 @@ conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch
 conda install captum -c conda-forge
 pip install scikit-learn
 conda install pandas
+conda install tqdm
 ```
 
 **Step 3**: Run the following command for training, evaluation, and explanation: 

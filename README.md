@@ -22,17 +22,11 @@ tar -xvzf ./Default_Database/names.tar.gz -C ./Default_Database/
 **Step 2**: Install anaconda from [here](https://docs.anaconda.com/free/anaconda/install/index.html) and establish the anaconda environment using the following commands: 
 
 ```bash
-conda create -n microkpnn-mt python=3.8
+conda env create -f requirements.yml -n microkpnn-mt
 conda activate microkpnn-mt
 
-# install the suitable PyTorch version according to your CUDA version
-# e.g.
-conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch
-# install captum package for explanation
-conda install captum -c conda-forge
-pip install scikit-learn
-conda install pandas
-conda install tqdm
+# note: We use CUDA 11.7 and PyTorch 1.13. Please install the suitable PyTorch version to 
+# your CUDA version (https://pytorch.org/get-started/locally/). 
 ```
 
 **Step 3**: Run the following command for training, evaluation, and explanation: 
@@ -44,7 +38,7 @@ You can select your taxonomy based on the following:
 ```
 Based on our experiments, we observed that, in general, the genus taxonomic rank yielded the best results. Therefore, we recommend using genus (--taxonomy 5); however, users are welcome to explore other taxonomic ranks for their analysis.
 
-To run the pipeline on the dataset use following command: 
+If you'd like to use a sample dataset to make the running procedure faster, please go to [Train on Sample User Dataset](#train-on-sample-user-dataset). To run the pipeline on the whole dataset use the following command: 
 
 ```bash
 # 5-fold validation
@@ -76,66 +70,9 @@ python lib/pred_meta.py \
 # note: `--explanation_path` is an optional parameter for explanation. 
 ```
 
-The format of the explanation results (`output/microkpnn_mt_fold0_explanation.pkl`) is:  
+The format of the explanation results (`output/microkpnn_mt_fold0_explanation.pkl`) is shown in [Explanation Output Format](#explanation-output-format). The plots for explanation can be found in `exp_interpretation_plots.ipynb`. 
 
-```python
-# 1. meta-data -> disease
-'age_disease_explanations': {
-    'disease_1': Tensor,  # Attributes for age to disease_1, size: (sample_number, age_cls_number)
-    'disease_2': Tensor,  # Attributes for age to disease_2, size: (sample_number, age_cls_number)
-    ...
-},
-'gender_disease_explanations': {
-    'disease_1': Tensor, 
-    ...
-},
-'bmi_disease_explanations': {
-    'disease_1': Tensor, 
-    ...
-},
-'bodysite_disease_explanations': {
-    'disease_1': Tensor, 
-    ...
-}, 
-# 2. hidden layer -> meta-data
-'hidden_age_explanations': {
-    'age_1': Tensor,  # Attributes for hidden layers to age_1, size: (sample_number, hidden_nodes_number)
-    'age_2': Tensor,  # Attributes for hidden layers to age_2, size: (sample_number, hidden_nodes_number)
-    ...
-}, 
-'hidden_gender_explanations': {
-    'gender_1': Tensor,
-    ...
-},
-'hidden_bmi_explanations': {
-    'bmi_1': Tensor,
-    ...
-},
-'hidden_bodysite_explanations': {
-    'bodysite_1': Tensor,
-    ...
-}
-```
-
-## Experiments
-
-**Experiment 1**: K-fold validation of disease prediction and missing meta-data prediction
-
-```bash
-# train and evluation (5-fold)
-bash exp_5fold.sh
-```
-
-**Experiment 2**: Interpretation of the predictive models
-
-```bash
-# train, evaluate, and explain 20 models
-bash exp_interpretation.sh
-```
-
-The codes for plotting explanation results are in `exp_interpretation_plots.ipynb`. 
-
-## Sample User Dataset
+### Train on Sample User Dataset
 
 Here we provide a smaller dataset containing 4 different phenotypes.
 
@@ -157,3 +94,62 @@ python MicroKPNN_MT.py \
 # please set k_fold as 0. 
 ```
 
+### Explanation Output Format
+
+```python
+# 1. meta-data -> disease
+'age_disease_explanations': {
+    'disease_1': Tensor,  # Attributes for age to disease_1, size: (sample number, age class number)
+    'disease_2': Tensor,  # Attributes for age to disease_2, size: (sample number, age class number)
+    ...
+},
+'gender_disease_explanations': {
+    'disease_1': Tensor, 
+    ...
+},
+'bmi_disease_explanations': {
+    'disease_1': Tensor, 
+    ...
+},
+'bodysite_disease_explanations': {
+    'disease_1': Tensor, 
+    ...
+}, 
+# 2. hidden layer -> meta-data
+'hidden_age_explanations': {
+    'age_1': Tensor,  # Attributes for hidden layers to age_1, size: (sample number, hidden nodes number)
+    'age_2': Tensor,  # Attributes for hidden layers to age_2, size: (sample number, hidden nodes number)
+    ...
+}, 
+'hidden_gender_explanations': {
+    'gender_1': Tensor,
+    ...
+},
+'hidden_bmi_explanations': {
+    'bmi_1': Tensor,
+    ...
+},
+'hidden_bodysite_explanations': {
+    'bodysite_1': Tensor,
+    ...
+}
+```
+
+## Our Experiments
+
+This section offers the detailed commands we used in our experiments. 
+
+**Experiment 1**: K-fold validation of disease prediction and missing meta-data prediction
+
+```bash
+# train and evluation (5-fold)
+bash exp_5fold.sh
+```
+
+**Experiment 2**: Interpretation of the predictive models
+
+```bash
+# train, evaluate, and explain 20 models
+bash exp_interpretation.sh
+```
+The codes for plotting explanation results are in `exp_interpretation_plots.ipynb`. 

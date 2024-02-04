@@ -65,6 +65,7 @@ dependencies:
   - mkl_random=1.2.2=py37h51133e4_0
   - ncurses=6.4=h6a678d5_0
   - nettle=3.7.3=hbbd107a_1
+  - networkx
   - numpy-base=1.21.5=py37ha15fc14_3
   - openh264=2.1.1=h4ff587b_0
   - openssl=1.1.1w=h7f8727e_0

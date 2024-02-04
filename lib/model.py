@@ -36,9 +36,6 @@ class MicroKPNN_MTL(nn.Module):
 		# generate the mask
 		metadatas = ['BMI', 'gender', 'age', 'bodysite', 'phenotype']
 		edge_df = pd.read_csv(edge_list)
-		nan_rows = edge_df[edge_df['parent'].isnull()]
-
-		print(nan_rows)
 
 		parent_nodes = list(set(edge_df['parent'].tolist()))
 		parent_nodes = [node for node in parent_nodes if node not in metadatas] # remove metadata from parent nodes

@@ -146,6 +146,15 @@ This section offers the detailed commands we used in our experiments.
 bash exp_5fold.sh
 ```
 
+**Experiment 2**: k-fold validation to check the generalizability of our method:
+
+We train and test our model on the following diseases: Cystic Fibrosis, Chronic Obstructive Pulmonary Disease, Bacterial Vaginosis, and healthy samples.
+
+```bash
+# train on train_dataset from 10 different projects and test and predict on test dataset from 6 independent projects.
+bash exp_generalizability.sh
+```
+
 **Experiment 2**: Interpretation of the predictive models
 
 ```bash

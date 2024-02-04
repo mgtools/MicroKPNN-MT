@@ -155,7 +155,7 @@ We train and test our model on the following diseases: Cystic Fibrosis, Chronic 
 bash exp_generalizability.sh
 ```
 
-**Experiment 2**: Interpretation of the predictive models
+**Experiment 3**: Interpretation of the predictive models
 
 ```bash
 # train, evaluate, and explain 20 models

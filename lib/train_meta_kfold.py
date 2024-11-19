@@ -200,15 +200,19 @@ if __name__ == "__main__":
 	print('disease num:', disease_num)
 
 	# training settings: 
+	# lr = 0.0001
+	# batch_size = 64
+	# epoch_num = 100
+	# early_stop_step = 20
 	lr = 0.0001
-	batch_size = 64
+	batch_size = 32
 	epoch_num = 100
 	early_stop_step = 20
 	
-	# check the directory
-
 	checkpoint_dir = "/".join(args.checkpoint_path.split('/')[:-1])
 	records_dir = "/".join(args.records_path.split('/')[:-1])
+	os.makedirs(checkpoint_dir, exist_ok=True)
+	os.makedirs(records_dir, exist_ok=True)
 
 	# --------------- K-Fold Validation --------------- # 
 	print('Loading the dataset...')
@@ -237,6 +241,7 @@ if __name__ == "__main__":
 		# refresh the values used to control early stop
 		early_stop_patience = 0
 		best_disease_acc = 0
+		best_disease_auc = 0
 
 		# 1. Model 
 		print('Establishing the model...')
@@ -276,6 +281,8 @@ if __name__ == "__main__":
 			model.load_state_dict(torch.load(resume_path_foldi, map_location=device)['model_state_dict'])
 			optimizer.load_state_dict(torch.load(resume_path_foldi, map_location=device)['optimizer_state_dict'])
 			scheduler.load_state_dict(torch.load(resume_path_foldi, map_location=device)['scheduler_state_dict'])
+			best_disease_acc = torch.load(resume_path_foldi, map_location=device)['best_disease_acc']
+			best_disease_auc = torch.load(resume_path_foldi, map_location=device)['best_disease_auc']
 		else:
 			epoch_start = 1
 
@@ -355,8 +362,9 @@ if __name__ == "__main__":
 			print("Disease >>>\nACC: {}, AUC: {}, F1: {}".format(disease_acc, disease_auc, disease_f1))
 			
 
-			if disease_acc > best_disease_acc: 
+			if disease_acc > best_disease_acc or np.mean(disease_auc) > best_disease_auc: 
 				best_disease_acc = disease_acc
+				best_disease_auc = np.mean(disease_auc)
 
 				if args.checkpoint_path != '': 
 					print('Saving checkpoint...')
@@ -365,6 +373,7 @@ if __name__ == "__main__":
 									'optimizer_state_dict': optimizer.state_dict(), 
 									'scheduler_state_dict': scheduler.state_dict(), 
 									'best_disease_acc': best_disease_acc, 
+									'best_disease_auc': best_disease_auc,
 									'num_params': num_params}
 					torch.save(checkpoint, checkpoint_path_foldi)
 
@@ -376,6 +385,7 @@ if __name__ == "__main__":
 
 			scheduler.step(disease_acc) # ReduceLROnPlateau
 			print(f'Best disease accuracy so far: {disease_acc}')
+			print(f'Best disease AUC so far: {np.mean(disease_auc)}')
 
 			if early_stop_patience == early_stop_step: 
 				print('Early stop!')

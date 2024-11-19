@@ -9,6 +9,8 @@ import csv
 import os
 import pickle
 
+from random import sample 
+
 
 
 class MicroDataset(Dataset): 
@@ -21,6 +23,16 @@ class MicroDataset(Dataset):
 		embedding_file_path = output + "/embedding_data.pkl"
 		if os.path.exists(embedding_file_path):
 			self.load_embedding_data(output, embedding_file_path)
+
+			# for debugging
+			# self.sample_ids = sample(self.sample_ids, 2000)
+			# self.species = sample(self.species, 2000)
+			# self.ages = sample(self.ages, 2000)
+			# self.genders = sample(self.genders, 2000)
+			# self.bmis = sample(self.bmis, 2000)
+			# self.bodysites = sample(self.bodysites, 2000)
+			# self.diseases = sample(self.diseases, 2000)
+			# self.diseases_idx = sample(self.diseases_idx, 2000)
 		else:
 			print(f"The file {embedding_file_path} does not exist.")
 			self.process_data(data_path, metadata_path, species_dict, output)

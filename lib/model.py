@@ -19,7 +19,7 @@ class MaskedLinear(nn.Module):
 		def backward_hook(grad):
 			# Clone due to not being allowed to modify in-place gradients
 			out = grad.clone()
-			out[indices_mask] = 0
+			out[~indices_mask] = 0
 			return out
  
 		self.linear = nn.Linear(in_dim, out_dim)
@@ -37,6 +37,7 @@ class MicroKPNN_MTL(nn.Module):
 		metadatas = ['BMI', 'gender', 'age', 'bodysite', 'phenotype']
 		edge_df = pd.read_csv(edge_list)
 
+		edge_df['parent'] = edge_df['parent'].astype(str)
 		parent_nodes = list(set(edge_df['parent'].tolist()))
 		parent_nodes = [node for node in parent_nodes if node not in metadatas] # remove metadata from parent nodes
 
@@ -61,29 +62,38 @@ class MicroKPNN_MTL(nn.Module):
 		
 		self.decoder_age = nn.Sequential(nn.Linear(hidden_dim, hidden_dim), 
 										nn.ReLU(), 
+										nn.Dropout(0.2), # add dropout layer in case overfitting
 										nn.Linear(hidden_dim, 6), 
+										nn.Dropout(0.2), # add dropout layer in case overfitting
 										)
 									
 		self.decoder_gender = nn.Sequential(nn.Linear(hidden_dim, hidden_dim), 
 										nn.ReLU(), 
+										nn.Dropout(0.2), # add dropout layer in case overfitting
 										nn.Linear(hidden_dim, 1), 
 										nn.Sigmoid(), 
 										)
 		
 		self.decoder_bmi = nn.Sequential(nn.Linear(hidden_dim, hidden_dim), 
 										nn.ReLU(),
+										nn.Dropout(0.2), # add dropout layer in case overfitting
 										nn.Linear(hidden_dim, 4), 
+										nn.Dropout(0.2), # add dropout layer in case overfitting
 										)
 		
 		self.decoder_bodysite = nn.Sequential(nn.Linear(hidden_dim, hidden_dim), 
 										nn.ReLU(), 
+										nn.Dropout(0.2), # add dropout layer in case overfitting
 										nn.Linear(hidden_dim, bodysite_num), 
+										nn.Dropout(0.2), # add dropout layer in case overfitting
 										)
 		
 
 		self.decoder_disease = nn.Sequential(nn.Linear(hidden_dim+bodysite_num+11, hidden_dim), 
 										nn.ReLU(), 
+										nn.Dropout(0.2), # add dropout layer in case overfitting
 										nn.Linear(hidden_dim, disease_num), 
+										nn.Dropout(0.2), # add dropout layer in case overfitting
 										)
 
 		for m in self.modules(): 

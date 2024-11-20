@@ -162,3 +162,26 @@ bash exp_generalizability.sh
 bash exp_interpretation.sh
 ```
 The codes for plotting explanation results are in `exp_interpretation_plots.ipynb`. 
+
+
+## Benchmarking Models
+
+We utilize well-known models such as **SVM**, **Random Forest**, and **XGBoost** for benchmarking. The repository includes two scripts tailored for different use cases:
+
+- **`baseline_all_kfold.py`**: Predicts all metadata and disease labels using the specified models, providing a comprehensive evaluation across all targets.
+```bash
+  python benchmark/baseline_all_kfold.py \
+--data_path Dataset/relative_abundance.csv \
+--metadata_path Dataset/metadata.csv \
+--output output/ \
+--model_type SVM
+```
+- **`baseline_disease_kfold.py`**: Focuses solely on predicting disease labels. This script is optimized for cases where only disease prediction results are needed, offering faster execution.
+
+```bash
+  python benchmark/baseline_disease_kfold.py \
+--data_path Dataset/relative_abundance.csv \
+--metadata_path Dataset/metadata.csv \
+--output output/ \
+--model_type SVM
+ ```
